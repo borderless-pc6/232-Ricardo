@@ -1,52 +1,105 @@
-# Welcome to your Expo app 👋
+# Clubão do Descontão
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Um aplicativo React Native/Expo para descontos e ofertas especiais.
 
-## Get started
+## 🚀 Funcionalidades
 
-1. Install dependencies
+- **Tela de Login/Registro**: Interface simples e intuitiva para autenticação
+- **Navegação por Tabs**: Sistema de navegação com duas abas principais
+- **Tela de Ofertas**: Exibição de categorias de produtos com descontos
+- **Design Responsivo**: Suporte para modo claro e escuro
+- **Validação de Formulários**: Verificação de campos obrigatórios
 
-   ```bash
-   npm install
-   ```
+## 📱 Telas
 
-2. Start the app
+### Tela de Autenticação (`/auth`)
+- Login e registro em uma única tela
+- Validação de campos obrigatórios
+- Design moderno com cores temáticas
+- Navegação automática após autenticação
 
-   ```bash
-   npx expo start
-   ```
+### Tela Inicial (`/(tabs)/index`)
+- Boas-vindas personalizadas
+- Botão de logout
+- Interface adaptada ao tema do app
 
-In the output, you'll find options to open the app in a
+### Tela de Ofertas (`/(tabs)/explore`)
+- Grid de categorias com descontos
+- Destaque da semana
+- Cards coloridos e interativos
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🛠️ Tecnologias Utilizadas
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- **React Native** com **Expo**
+- **Expo Router** para navegação
+- **TypeScript** para tipagem
+- **React Native Reanimated** para animações
+- **Expo Font** para fontes customizadas
 
-## Get a fresh project
+## 🎨 Design System
 
-When you're ready, run:
+### Cores Principais
+- **Laranja**: `#FF6B35` (cor principal do app)
+- **Azul**: `#0a7ea4` (cor de destaque)
+- **Suporte a tema claro/escuro**
 
+### Componentes
+- `ThemedText`: Texto com suporte a temas
+- `ThemedView`: Container com suporte a temas
+- `ParallaxScrollView`: Scroll com efeito parallax
+- `IconSymbol`: Ícones do sistema
+
+## 📦 Instalação
+
+1. Clone o repositório:
 ```bash
-npm run reset-project
+git clone <url-do-repositorio>
+cd 232-Ricardo
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. Instale as dependências:
+```bash
+npm install
+```
 
-## Learn more
+3. Execute o projeto:
+```bash
+npx expo start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+## 🔧 Estrutura do Projeto
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```
+app/
+├── _layout.tsx          # Layout principal com navegação
+├── auth.tsx            # Tela de autenticação
+└── (tabs)/
+    ├── _layout.tsx     # Layout das tabs
+    ├── index.tsx       # Tela inicial
+    └── explore.tsx     # Tela de ofertas
 
-## Join the community
+components/
+├── ThemedText.tsx      # Componente de texto temático
+├── ThemedView.tsx      # Componente de view temático
+└── ui/                 # Componentes de interface
 
-Join our community of developers creating universal apps.
+constants/
+└── Colors.ts          # Definição de cores
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-# 232-Ricardo
-# 232-Ricardo
+hooks/
+├── useColorScheme.ts   # Hook para tema
+└── useThemeColor.ts    # Hook para cores temáticas
+```
+
+## 🎯 Próximos Passos
+
+- [ ] Implementar autenticação real (Firebase, Auth0, etc.)
+- [ ] Adicionar persistência de dados
+- [ ] Implementar busca de produtos
+- [ ] Adicionar favoritos
+- [ ] Implementar notificações push
+- [ ] Adicionar testes unitários
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT.
