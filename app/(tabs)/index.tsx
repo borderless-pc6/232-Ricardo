@@ -75,25 +75,11 @@ export default function HomeScreen() {
   };
 
   const handleMedicines = () => {
-    Alert.alert(
-      'Medicamentos',
-      'Compre medicamentos diretamente dos laboratórios com preços especiais!',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Ver Medicamentos', onPress: () => console.log('Ver medicamentos') },
-      ]
-    );
+    router.push('/medicines');
   };
 
   const handleSalonBooking = () => {
-    Alert.alert(
-      'Salões de Beleza',
-      'Agende seus serviços de beleza com os melhores profissionais!',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Agendar', onPress: () => console.log('Agendar salão') },
-      ]
-    );
+    router.push('/beauty-salons');
   };
 
   const handleReferral = () => {
@@ -587,4 +573,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
