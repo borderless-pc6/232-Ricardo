@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
     Alert,
+    Modal,
     ScrollView,
     Share,
     StyleSheet,
@@ -14,6 +15,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ReferralsScreen() {
+    const [shareModalVisible, setShareModalVisible] = useState(false);
+    const [referralModalVisible, setReferralModalVisible] = useState(false);
+    const [selectedReferral, setSelectedReferral] = useState<any>(null);
     const [referrals] = useState([
         {
             id: 1,
@@ -77,8 +81,7 @@ export default function ReferralsScreen() {
     });
 
     const backgroundColor = useThemeColor({}, 'background');
-    const textColor = useThemeColor({}, 'text');
-    const tintColor = useThemeColor({}, 'tint');
+
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -102,26 +105,45 @@ export default function ReferralsScreen() {
         }
     };
 
-    const handleShareLink = async () => {
+    const handleShareLink = () => {
+        setShareModalVisible(true);
+    };
+
+    const handleShareOption = async (option: string) => {
         try {
             const referralLink = 'https://clubaodescontao.com/convite/ricardo123';
             const message = `🎉 Olha que legal! Estou economizando 20% na minha conta de energia com o Clubão do Descontão!\n\nVocê também pode economizar e ainda ganhar dinheiro indicando outras pessoas!\n\nUse meu link: ${referralLink}\n\n#ClubãoDoDescontão #Economia #Energia`;
 
-            await Share.share({
+            const result = await Share.share({
                 message: message,
                 title: 'Clubão do Descontão - Economize 20% na Energia!',
+                url: referralLink,
             });
+
+            if (result.action === Share.sharedAction) {
+                console.log('Link compartilhado com sucesso!');
+                setShareModalVisible(false);
+            } else if (result.action === Share.dismissedAction) {
+                console.log('Compartilhamento cancelado');
+            }
         } catch (error) {
+            console.error('Erro ao compartilhar:', error);
             Alert.alert('Erro', 'Não foi possível compartilhar o link');
         }
     };
 
+    const closeShareModal = () => {
+        setShareModalVisible(false);
+    };
+
     const handleReferralPress = (referral: any) => {
-        Alert.alert(
-            referral.name,
-            `Status: ${getStatusText(referral.status)}\nEmail: ${referral.email}\nData de cadastro: ${new Date(referral.joinDate).toLocaleDateString('pt-BR')}\nGanhos totais: R$ ${referral.totalEarnings.toFixed(2)}\nGanhos mensais: R$ ${referral.monthlyEarnings.toFixed(2)}`,
-            [{ text: 'OK' }]
-        );
+        setSelectedReferral(referral);
+        setReferralModalVisible(true);
+    };
+
+    const closeReferralModal = () => {
+        setReferralModalVisible(false);
+        setSelectedReferral(null);
     };
 
     return (
@@ -183,10 +205,15 @@ export default function ReferralsScreen() {
                         <ThemedText style={styles.shareDescription}>
                             Compartilhe seu link de indicação e ganhe 30% do valor em kWh por cada nova indicação + 1% recorrente!
                         </ThemedText>
-                        <TouchableOpacity style={styles.shareButton} onPress={handleShareLink}>
+                        <TouchableOpacity
+                            style={styles.shareButton}
+                            onPress={handleShareLink}
+                            activeOpacity={0.8}
+                        >
                             <IconSymbol name="square.and.arrow.up" size={20} color="white" />
                             <ThemedText style={styles.shareButtonText}>Compartilhar Link</ThemedText>
                         </TouchableOpacity>
+
                     </View>
                 </View>
 
@@ -259,7 +286,7 @@ export default function ReferralsScreen() {
                             <View style={styles.stepContent}>
                                 <ThemedText style={styles.stepTitle}>Compartilhe seu Link</ThemedText>
                                 <ThemedText style={styles.stepDescription}>
-                                    Use o botão "Compartilhar Link" para enviar seu link de indicação
+                                    Use o botão &quot;Compartilhar Link&quot; para enviar seu link de indicação
                                 </ThemedText>
                             </View>
                         </View>
@@ -269,21 +296,9 @@ export default function ReferralsScreen() {
                                 <ThemedText style={styles.stepNumberText}>2</ThemedText>
                             </View>
                             <View style={styles.stepContent}>
-                                <ThemedText style={styles.stepTitle}>Amigo se Cadastra</ThemedText>
-                                <ThemedText style={styles.stepDescription}>
-                                    Seu amigo usa seu link e cadastra sua conta de energia
-                                </ThemedText>
-                            </View>
-                        </View>
-
-                        <View style={styles.step}>
-                            <View style={styles.stepNumber}>
-                                <ThemedText style={styles.stepNumberText}>3</ThemedText>
-                            </View>
-                            <View style={styles.stepContent}>
                                 <ThemedText style={styles.stepTitle}>Você Ganha!</ThemedText>
                                 <ThemedText style={styles.stepDescription}>
-                                    30% do valor em kWh + 1% recorrente das contas cadastradas
+                                    30% do valor em kWh + 1% recorrente das contas cadastradas + 5% de cada atendimento realizado pelo salão indicado
                                 </ThemedText>
                             </View>
                         </View>
@@ -297,6 +312,175 @@ export default function ReferralsScreen() {
                     </ThemedText>
                 </View>
             </ScrollView>
+
+            {/* Modal de Compartilhamento */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={shareModalVisible}
+                onRequestClose={closeShareModal}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        {/* Header do Modal */}
+                        <View style={styles.modalHeader}>
+                            <View style={styles.modalIcon}>
+                                <IconSymbol name="square.and.arrow.up" size={32} color="#FF6B35" />
+                            </View>
+                            <View style={styles.modalTitleContainer}>
+                                <ThemedText style={styles.modalTitle}>Compartilhar Indicação</ThemedText>
+                                <ThemedText style={styles.modalSubtitle}>
+                                    Compartilhe seu link e ganhe comissões!
+                                </ThemedText>
+                            </View>
+                            <TouchableOpacity style={styles.closeButton} onPress={closeShareModal}>
+                                <IconSymbol name="xmark" size={20} color="#999" />
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Conteúdo do Modal */}
+                        <View style={styles.modalContent}>
+                            <ThemedText style={styles.modalDescription}>
+                                Escolha como você quer compartilhar seu link de indicação:
+                            </ThemedText>
+
+                            {/* Opções de Compartilhamento */}
+                            <View style={styles.shareOptions}>
+                                <TouchableOpacity
+                                    style={styles.shareOption}
+                                    onPress={() => handleShareOption('whatsapp')}
+                                >
+                                    <View style={[styles.shareOptionIcon, { backgroundColor: '#25D366' }]}>
+                                        <IconSymbol name="message.fill" size={24} color="white" />
+                                    </View>
+                                    <ThemedText style={styles.shareOptionText}>WhatsApp</ThemedText>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={styles.shareOption}
+                                    onPress={() => handleShareOption('message')}
+                                >
+                                    <View style={[styles.shareOptionIcon, { backgroundColor: '#007AFF' }]}>
+                                        <IconSymbol name="message" size={24} color="white" />
+                                    </View>
+                                    <ThemedText style={styles.shareOptionText}>Mensagem</ThemedText>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={styles.shareOption}
+                                    onPress={() => handleShareOption('email')}
+                                >
+                                    <View style={[styles.shareOptionIcon, { backgroundColor: '#FF6B35' }]}>
+                                        <IconSymbol name="envelope.fill" size={24} color="white" />
+                                    </View>
+                                    <ThemedText style={styles.shareOptionText}>E-mail</ThemedText>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={styles.shareOption}
+                                    onPress={() => handleShareOption('copy')}
+                                >
+                                    <View style={[styles.shareOptionIcon, { backgroundColor: '#8E8E93' }]}>
+                                        <IconSymbol name="doc.on.doc" size={24} color="white" />
+                                    </View>
+                                    <ThemedText style={styles.shareOptionText}>Copiar Link</ThemedText>
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Botões do Modal */}
+                            <View style={styles.modalButtons}>
+                                <TouchableOpacity style={styles.cancelButton} onPress={closeShareModal}>
+                                    <ThemedText style={styles.cancelButtonText}>Cancelar</ThemedText>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Modal de Detalhes da Indicação */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={referralModalVisible}
+                onRequestClose={closeReferralModal}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        {selectedReferral && (
+                            <>
+                                {/* Header do Modal */}
+                                <View style={styles.modalHeader}>
+                                    <View style={styles.modalIcon}>
+                                        <IconSymbol name="person.fill" size={32} color="#4CAF50" />
+                                    </View>
+                                    <View style={styles.modalTitleContainer}>
+                                        <ThemedText style={styles.modalTitle}>{selectedReferral.name}</ThemedText>
+                                        <ThemedText style={styles.modalLaboratory}>
+                                            Email: {selectedReferral.email}
+                                        </ThemedText>
+                                    </View>
+                                    <TouchableOpacity style={styles.closeButton} onPress={closeReferralModal}>
+                                        <IconSymbol name="xmark" size={20} color="#999" />
+                                    </TouchableOpacity>
+                                </View>
+
+                                {/* Conteúdo do Modal */}
+                                <View style={styles.modalContent}>
+                                    <ThemedText style={styles.modalDescription}>
+                                        Detalhes completos da indicação
+                                    </ThemedText>
+
+                                    {/* Informações da Indicação */}
+                                    <View style={styles.referralInfoContainer}>
+                                        <View style={styles.infoRow}>
+                                            <ThemedText style={styles.infoLabel}>Status:</ThemedText>
+                                            <View style={[styles.statusBadge, { backgroundColor: getStatusColor(selectedReferral.status) }]}>
+                                                <ThemedText style={styles.statusText}>
+                                                    {getStatusText(selectedReferral.status)}
+                                                </ThemedText>
+                                            </View>
+                                        </View>
+
+                                        <View style={styles.infoRow}>
+                                            <ThemedText style={styles.infoLabel}>Data de cadastro:</ThemedText>
+                                            <ThemedText style={styles.infoValue}>
+                                                {new Date(selectedReferral.joinDate).toLocaleDateString('pt-BR')}
+                                            </ThemedText>
+                                        </View>
+
+                                        <View style={styles.infoRow}>
+                                            <ThemedText style={styles.infoLabel}>Ganhos totais:</ThemedText>
+                                            <ThemedText style={[styles.infoValue, styles.earningsValue]}>
+                                                R$ {selectedReferral.totalEarnings.toFixed(2)}
+                                            </ThemedText>
+                                        </View>
+
+                                        <View style={styles.infoRow}>
+                                            <ThemedText style={styles.infoLabel}>Ganhos mensais:</ThemedText>
+                                            <ThemedText style={[styles.infoValue, styles.earningsValue]}>
+                                                R$ {selectedReferral.monthlyEarnings.toFixed(2)}
+                                            </ThemedText>
+                                        </View>
+
+                                        <View style={styles.infoRow}>
+                                            <ThemedText style={styles.infoLabel}>kWh economizados:</ThemedText>
+                                            <ThemedText style={styles.infoValue}>
+                                                {selectedReferral.totalKwh} kWh
+                                            </ThemedText>
+                                        </View>
+                                    </View>
+
+                                    {/* Botão de Fechar */}
+                                    <TouchableOpacity style={styles.closeModalButton} onPress={closeReferralModal}>
+                                        <ThemedText style={styles.closeModalButtonText}>Fechar</ThemedText>
+                                    </TouchableOpacity>
+                                </View>
+                            </>
+                        )}
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -540,5 +724,160 @@ const styles = StyleSheet.create({
         fontSize: 14,
         opacity: 0.7,
         textAlign: 'center',
+    },
+    // Estilos do Modal de Compartilhamento
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+    },
+    modalContainer: {
+        backgroundColor: 'white',
+        borderRadius: 16,
+        width: '100%',
+        maxWidth: 400,
+        maxHeight: '80%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.25,
+        shadowRadius: 20,
+        elevation: 10,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+    },
+    modalIcon: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: 'rgba(255, 107, 53, 0.1)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 16,
+    },
+    modalTitleContainer: {
+        flex: 1,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 4,
+        color: '#FF6B35',
+    },
+    modalSubtitle: {
+        fontSize: 14,
+        color: '#666',
+        fontWeight: '500',
+    },
+    closeButton: {
+        padding: 8,
+    },
+    modalContent: {
+        padding: 20,
+    },
+    modalDescription: {
+        fontSize: 16,
+        lineHeight: 24,
+        marginBottom: 24,
+        textAlign: 'center',
+        opacity: 0.8,
+    },
+    shareOptions: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        gap: 16,
+        marginBottom: 24,
+    },
+    shareOption: {
+        alignItems: 'center',
+        width: '45%',
+        padding: 16,
+        backgroundColor: '#f8f9fa',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(0, 0, 0, 0.1)',
+    },
+    shareOptionIcon: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 8,
+    },
+    shareOptionText: {
+        fontSize: 14,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+    },
+    cancelButton: {
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+    },
+    cancelButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#666',
+    },
+    // Estilos específicos do Modal de Indicação
+    modalLaboratory: {
+        fontSize: 14,
+        color: '#FF6B35',
+        fontWeight: '600',
+    },
+    referralInfoContainer: {
+        backgroundColor: '#f8f9fa',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 20,
+    },
+    infoRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    infoLabel: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+        flex: 1,
+    },
+    infoValue: {
+        fontSize: 16,
+        color: '#666',
+        fontWeight: '500',
+    },
+    earningsValue: {
+        color: '#4CAF50',
+        fontWeight: 'bold',
+        fontSize: 18,
+    },
+    closeModalButton: {
+        backgroundColor: '#FF6B35',
+        paddingVertical: 16,
+        paddingHorizontal: 32,
+        borderRadius: 12,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    closeModalButtonText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold',
     },
 });

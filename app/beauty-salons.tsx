@@ -809,6 +809,58 @@ export default function BeautySalonsScreen() {
                             showsVerticalScrollIndicator={false}
                             contentContainerStyle={styles.generalCalendarContentContainer}
                         >
+                            {/* Lista de Agendamentos */}
+                            <View style={styles.appointmentsSection}>
+                                <ThemedText style={styles.sectionTitle}>Próximos Agendamentos</ThemedText>
+
+                                {/* Debug simples */}
+                                <ThemedText style={{ color: 'red', fontSize: 16, marginBottom: 10 }}>
+                                    DEBUG: {appointments.length} agendamentos encontrados
+                                </ThemedText>
+
+                                {appointments.map((appointment) => (
+                                    <View key={appointment.id} style={styles.appointmentCard}>
+                                        <View style={styles.appointmentHeader}>
+                                            <View style={styles.appointmentIcon}>
+                                                <IconSymbol name="calendar" size={20} color="#FF6B35" />
+                                            </View>
+                                            <View style={styles.appointmentInfo}>
+                                                <ThemedText style={styles.appointmentService}>{appointment.service}</ThemedText>
+                                                <ThemedText style={styles.appointmentSalon}>{appointment.salon}</ThemedText>
+                                            </View>
+                                            <View style={[
+                                                styles.appointmentStatus,
+                                                { backgroundColor: appointment.status === 'confirmado' ? '#4CAF50' : '#FF9800' }
+                                            ]}>
+                                                <ThemedText style={styles.appointmentStatusText}>
+                                                    {appointment.status === 'confirmado' ? 'Confirmado' : 'Pendente'}
+                                                </ThemedText>
+                                            </View>
+                                        </View>
+                                        <View style={styles.appointmentDetails}>
+                                            <View style={styles.appointmentDetailRow}>
+                                                <IconSymbol name="calendar" size={16} color="#666" />
+                                                <ThemedText style={styles.appointmentDetailText}>
+                                                    {appointment.date.toLocaleDateString('pt-BR')}
+                                                </ThemedText>
+                                            </View>
+                                            <View style={styles.appointmentDetailRow}>
+                                                <IconSymbol name="clock" size={16} color="#666" />
+                                                <ThemedText style={styles.appointmentDetailText}>
+                                                    {appointment.time} ({appointment.duration} min)
+                                                </ThemedText>
+                                            </View>
+                                            <View style={styles.appointmentDetailRow}>
+                                                <IconSymbol name="dollarsign" size={16} color="#666" />
+                                                <ThemedText style={styles.appointmentDetailText}>
+                                                    R$ {appointment.price.toFixed(2)}
+                                                </ThemedText>
+                                            </View>
+                                        </View>
+                                    </View>
+                                ))}
+                            </View>
+
                             {/* Calendário */}
                             <View style={styles.generalCalendarSection}>
                                 <ThemedText style={styles.sectionTitle}>Calendário</ThemedText>
@@ -854,52 +906,6 @@ export default function BeautySalonsScreen() {
                                         </View>
                                     </View>
                                 </View>
-                            </View>
-
-                            {/* Lista de Agendamentos */}
-                            <View style={styles.appointmentsSection}>
-                                <ThemedText style={styles.sectionTitle}>Próximos Agendamentos</ThemedText>
-                                {appointments.map((appointment) => (
-                                    <View key={appointment.id} style={styles.appointmentCard}>
-                                        <View style={styles.appointmentHeader}>
-                                            <View style={styles.appointmentIcon}>
-                                                <IconSymbol name="calendar" size={20} color="#FF6B35" />
-                                            </View>
-                                            <View style={styles.appointmentInfo}>
-                                                <ThemedText style={styles.appointmentService}>{appointment.service}</ThemedText>
-                                                <ThemedText style={styles.appointmentSalon}>{appointment.salon}</ThemedText>
-                                            </View>
-                                            <View style={[
-                                                styles.appointmentStatus,
-                                                { backgroundColor: appointment.status === 'confirmado' ? '#4CAF50' : '#FF9800' }
-                                            ]}>
-                                                <ThemedText style={styles.appointmentStatusText}>
-                                                    {appointment.status === 'confirmado' ? 'Confirmado' : 'Pendente'}
-                                                </ThemedText>
-                                            </View>
-                                        </View>
-                                        <View style={styles.appointmentDetails}>
-                                            <View style={styles.appointmentDetailRow}>
-                                                <IconSymbol name="calendar" size={16} color="#666" />
-                                                <ThemedText style={styles.appointmentDetailText}>
-                                                    {appointment.date.toLocaleDateString('pt-BR')}
-                                                </ThemedText>
-                                            </View>
-                                            <View style={styles.appointmentDetailRow}>
-                                                <IconSymbol name="clock" size={16} color="#666" />
-                                                <ThemedText style={styles.appointmentDetailText}>
-                                                    {appointment.time} ({appointment.duration} min)
-                                                </ThemedText>
-                                            </View>
-                                            <View style={styles.appointmentDetailRow}>
-                                                <IconSymbol name="dollarsign" size={16} color="#666" />
-                                                <ThemedText style={styles.appointmentDetailText}>
-                                                    R$ {appointment.price.toFixed(2)}
-                                                </ThemedText>
-                                            </View>
-                                        </View>
-                                    </View>
-                                ))}
                             </View>
                         </ScrollView>
                     </View>
@@ -1692,5 +1698,25 @@ const styles = StyleSheet.create({
         marginLeft: 8,
         fontSize: 14,
         color: '#666',
+    },
+    // Estilos para estado vazio
+    emptyAppointmentsContainer: {
+        alignItems: 'center',
+        paddingVertical: 40,
+        paddingHorizontal: 20,
+    },
+    emptyAppointmentsText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#666',
+        marginTop: 16,
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    emptyAppointmentsSubtext: {
+        fontSize: 14,
+        color: '#999',
+        textAlign: 'center',
+        lineHeight: 20,
     },
 });

@@ -2,574 +2,917 @@ import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { router } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Alert,
-  Animated,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View
+    Alert,
+    Animated,
+    Image,
+    Linking,
+    Modal,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-
-
 export default function HomeScreen() {
-  const [userStats] = useState({
-    totalEarnings: 1250.50,
-    totalKwh: 850.25,
-    referralsCount: 12,
-    monthlyRecurring: 45.80,
-  });
+    const [refreshing, setRefreshing] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [affiliateModalVisible, setAffiliateModalVisible] = useState(false);
+    const [selectedAffiliate, setSelectedAffiliate] = useState<any>(null);
 
-  const [refreshing, setRefreshing] = useState(false);
-  const [greeting] = useState('Olá, Ricardo! 👋');
+    // Animações
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const slideAnim = useRef(new Animated.Value(50)).current;
+    const scaleAnim = useRef(new Animated.Value(0.95)).current;
 
-  const backgroundColor = useThemeColor({}, 'background');
+    useEffect(() => {
+        // Animação de entrada
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 800,
+                useNativeDriver: true,
+            }),
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 800,
+                useNativeDriver: true,
+            }),
+            Animated.timing(scaleAnim, {
+                toValue: 1,
+                duration: 800,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    }, [fadeAnim, slideAnim, scaleAnim]);
 
-  // Animações
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
-  const scaleAnim = useRef(new Animated.Value(0.95)).current;
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 2000);
+    }, []);
 
-  useEffect(() => {
-    // Animação de entrada
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [fadeAnim, slideAnim, scaleAnim]);
+    const [quickActions] = useState([
+        {
+            id: 1,
+            title: 'Cadastrar Energia',
+            description: 'Economize 20% na sua conta',
+            icon: 'sun.max.fill' as any,
+            color: '#FF6B35',
+        },
+        {
+            id: 2,
+            title: 'Meus afiliados',
+            description: 'Acompanhe seus ganhos',
+            icon: 'person.2.fill' as any,
+            color: '#4CAF50',
+            route: '/referrals',
+        },
+        {
+            id: 3,
+            title: 'Medicamentos',
+            description: 'Compre com desconto',
+            icon: 'pills.fill' as any,
+            color: '#2196F3',
+            route: '/medicines',
+        },
+        {
+            id: 4,
+            title: 'Salões de Beleza',
+            description: 'Agende serviços',
+            icon: 'scissors' as any,
+            color: '#E91E63',
+            route: '/beauty-salons',
+        },
+    ]);
 
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    // Simular atualização de dados
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
-  }, []);
+    const [stats] = useState({
+        totalSavings: 1250.50,
+        monthlySavings: 156.80,
+        totalReferrals: 12,
+        activeReferrals: 8,
+    });
 
-  const handleEnergyDiscount = () => {
-    Alert.alert(
-      'Desconto de Energia',
-      'Economize 20% na sua conta de energia! Cadastre sua conta e comece a economizar hoje mesmo.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Cadastrar Conta', onPress: () => router.push('/energy-registration') },
-      ]
-    );
-  };
+    const [affiliates] = useState([
+        {
+            id: 1,
+            name: 'Maria Silva',
+            email: 'maria.silva@email.com',
+            status: 'active',
+            joinDate: '2024-01-15',
+            totalEarnings: 125.50,
+            monthlyEarnings: 15.80,
+            energyConsumption: 450,
+        },
+        {
+            id: 2,
+            name: 'João Santos',
+            email: 'joao.santos@email.com',
+            status: 'active',
+            joinDate: '2024-01-20',
+            totalEarnings: 98.30,
+            monthlyEarnings: 12.40,
+            energyConsumption: 380,
+        },
+        {
+            id: 3,
+            name: 'Ana Costa',
+            email: 'ana.costa@email.com',
+            status: 'pending',
+            joinDate: '2024-02-01',
+            totalEarnings: 0,
+            monthlyEarnings: 0,
+            energyConsumption: 0,
+        },
+        {
+            id: 4,
+            name: 'Carlos Oliveira',
+            email: 'carlos.oliveira@email.com',
+            status: 'active',
+            joinDate: '2024-02-05',
+            totalEarnings: 67.20,
+            monthlyEarnings: 8.90,
+            energyConsumption: 320,
+        },
+        {
+            id: 5,
+            name: 'Fernanda Lima',
+            email: 'fernanda.lima@email.com',
+            status: 'active',
+            joinDate: '2024-02-10',
+            totalEarnings: 89.10,
+            monthlyEarnings: 11.20,
+            energyConsumption: 410,
+        },
+    ]);
 
-  const handleMedicines = () => {
-    router.push('/medicines');
-  };
+    const backgroundColor = useThemeColor({}, 'background');
 
-  const handleSalonBooking = () => {
-    router.push('/beauty-salons');
-  };
+    const handleQuickAction = async (action: any) => {
+        if (action.id === 1) { // Cadastrar Energia - abrir link da Sunne
+            try {
+                const url = 'https://ricardogigawatt.economia.sunne.com.br/';
+                const supported = await Linking.canOpenURL(url);
 
-  const handleReferral = () => {
-    Alert.alert(
-      'Sistema de Indicação',
-      'Ganhe 30% do valor em kWh ao indicar novos usuários + 1% recorrente!',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Ver Indicações', onPress: () => router.push('/referrals') },
-      ]
-    );
-  };
-
-
-
-  return (
-    <SafeAreaView style={[styles.container, { backgroundColor }]}>
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                if (supported) {
+                    await Linking.openURL(url);
+                } else {
+                    Alert.alert('Erro', 'Não foi possível abrir o link');
+                }
+            } catch {
+                Alert.alert('Erro', 'Não foi possível abrir o link');
+            }
+        } else if (action.route) {
+            router.push(action.route);
+        } else {
+            Alert.alert(
+                action.title,
+                action.description,
+                [{ text: 'OK' }]
+            );
         }
-      >
-        <Animated.View
-          style={[
-            styles.content,
-            {
-              opacity: fadeAnim,
-              transform: [
-                { translateY: slideAnim },
-                { scale: scaleAnim }
-              ],
-            },
-          ]}
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <View style={styles.headerTop}>
-              <View style={styles.greetingContainer}>
-                <ThemedText type="title" style={styles.welcomeText}>
-                  {greeting}
-                </ThemedText>
-                <ThemedText style={styles.subtitleText}>
-                  Bem-vindo ao Clubão do Descontão
-                </ThemedText>
-              </View>
-              <TouchableOpacity
-                style={styles.logoutButton}
-                onPress={() => router.replace('/auth')}
-              >
-                <IconSymbol name="rectangle.portrait.and.arrow.right" size={20} color="#FF6B35" />
-              </TouchableOpacity>
-            </View>
-          </View>
+    };
 
-          {/* Stats Cards */}
-          <View style={styles.statsContainer}>
-            <View style={styles.statsRow}>
-              <TouchableOpacity style={[styles.statCard, { backgroundColor: '#4CAF50' }]} activeOpacity={0.8}>
-                <View style={styles.statIconContainer}>
-                  <IconSymbol name="dollarsign.circle.fill" size={28} color="white" />
+    const handleShareReferral = () => {
+        Alert.alert(
+            'Compartilhar Indicação',
+            'Compartilhe seu link e ganhe comissões!',
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                { text: 'Compartilhar', onPress: () => console.log('Compartilhar link') },
+            ]
+        );
+    };
+
+    return (
+        <SafeAreaView style={[styles.container, { backgroundColor }]}>
+            <ScrollView
+                style={styles.scrollView}
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+            >
+                <Animated.View
+                    style={[
+                        styles.content,
+                        {
+                            opacity: fadeAnim,
+                            transform: [
+                                { translateY: slideAnim },
+                                { scale: scaleAnim }
+                            ],
+                        },
+                    ]}
+                >
+                    {/* Header */}
+                    <View style={styles.header}>
+                        <ThemedText type="title" style={styles.title}>
+                            Clubão do Descontão
+                        </ThemedText>
+                        <ThemedText style={styles.subtitle}>
+                            Economize mais, viva melhor!
+                        </ThemedText>
+                    </View>
+
+                    {/* Stats Cards */}
+                    <View style={styles.statsContainer}>
+                        <View style={styles.statsRow}>
+                            <TouchableOpacity style={[styles.statCard, { backgroundColor: '#4CAF50' }]}>
+                                <IconSymbol name="dollarsign.circle.fill" size={24} color="white" />
+                                <ThemedText style={styles.statValue}>R$ {stats.totalSavings.toFixed(2)}</ThemedText>
+                                <ThemedText style={styles.statLabel}>Valor Ganho Parcial</ThemedText>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.statCard, { backgroundColor: '#2196F3' }]}>
+                                <IconSymbol name="chart.line.uptrend.xyaxis" size={24} color="white" />
+                                <ThemedText style={styles.statValue}>R$ {stats.monthlySavings.toFixed(2)}</ThemedText>
+                                <ThemedText style={styles.statLabel}>Este Mês</ThemedText>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.statsRow}>
+                            <TouchableOpacity
+                                style={[styles.statCard, { backgroundColor: '#FF9800' }]}
+                                onPress={() => setModalVisible(true)}
+                            >
+                                <IconSymbol name="person.2.fill" size={24} color="white" />
+                                <ThemedText style={styles.statValue}>{stats.totalReferrals}</ThemedText>
+                                <ThemedText style={styles.statLabel}>Afiliados do seu link</ThemedText>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.statCard, { backgroundColor: '#FF5722' }]}>
+                                <IconSymbol name="exclamationmark.triangle.fill" size={24} color="white" />
+                                <ThemedText style={styles.statValue}>3</ThemedText>
+                                <ThemedText style={styles.statLabel}>Recuperação de Cobranças</ThemedText>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    {/* Quick Actions */}
+                    <View style={styles.quickActionsContainer}>
+                        <ThemedText type="subtitle" style={styles.sectionTitle}>
+                            Ações Rápidas
+                        </ThemedText>
+
+                        <View style={styles.quickActionsGrid}>
+                            {quickActions.map((action) => (
+                                <TouchableOpacity
+                                    key={action.id}
+                                    style={styles.quickActionCard}
+                                    onPress={() => handleQuickAction(action)}
+                                >
+                                    <View style={[styles.quickActionIcon, { backgroundColor: `${action.color}20` }]}>
+                                        {action.id === 1 ? (
+                                            <Image
+                                                source={require('@/assets/images/logo-energia.jpg')}
+                                                style={styles.logoImage}
+                                                resizeMode="cover"
+                                            />
+                                        ) : (
+                                            <IconSymbol name={action.icon} size={24} color={action.color} />
+                                        )}
+                                    </View>
+                                    <ThemedText style={styles.quickActionTitle}>{action.title}</ThemedText>
+                                    <ThemedText style={styles.quickActionDescription}>{action.description}</ThemedText>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
+
+                    {/* Share Referral */}
+                    <View style={styles.shareContainer}>
+                        <View style={styles.shareCard}>
+                            <View style={styles.shareHeader}>
+                                <IconSymbol name="gift.fill" size={24} color="#FF6B35" />
+                                <ThemedText style={styles.shareTitle}>Compartilhe e Ganhe!</ThemedText>
+                            </View>
+                            <ThemedText style={styles.shareDescription}>
+                                Envie seu link para o seu amigo e ganhe 30% do valor em kWh + 1% recorrente!
+                            </ThemedText>
+                            <TouchableOpacity style={styles.shareButton} onPress={handleShareReferral}>
+                                <IconSymbol name="square.and.arrow.up" size={20} color="white" />
+                                <ThemedText style={styles.shareButtonText}>Compartilhar Link</ThemedText>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    {/* Footer */}
+                    <View style={styles.footer}>
+                        <ThemedText style={styles.footerText}>
+                            Bem-vindo ao Clubão do Descontão! 🎉
+                        </ThemedText>
+                    </View>
+                </Animated.View>
+            </ScrollView>
+
+            {/* Modal de Afiliados */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <View style={styles.modalHeader}>
+                                <ThemedText style={styles.modalTitle}>Meus Afiliados</ThemedText>
+                                <TouchableOpacity
+                                    style={styles.closeButton}
+                                    onPress={() => setModalVisible(false)}
+                                >
+                                    <ThemedText style={styles.closeButtonText}>✕</ThemedText>
+                                </TouchableOpacity>
+                            </View>
+
+                            <ScrollView style={styles.affiliatesList} showsVerticalScrollIndicator={false}>
+                                {affiliates.map((affiliate) => (
+                                    <TouchableOpacity
+                                        key={affiliate.id}
+                                        style={styles.affiliateCard}
+                                        onPress={() => {
+                                            console.log('Opening affiliate modal for:', affiliate.name);
+                                            setSelectedAffiliate(affiliate);
+                                            setAffiliateModalVisible(true);
+                                        }}
+                                    >
+                                        <View style={styles.affiliateHeader}>
+                                            <View style={styles.affiliateInfo}>
+                                                <ThemedText style={styles.affiliateName}>{affiliate.name}</ThemedText>
+                                                <ThemedText style={styles.affiliateEmail}>{affiliate.email}</ThemedText>
+                                            </View>
+                                            <View style={[
+                                                styles.statusBadge,
+                                                { backgroundColor: affiliate.status === 'active' ? '#4CAF50' : '#FF9800' }
+                                            ]}>
+                                                <ThemedText style={styles.statusText}>
+                                                    {affiliate.status === 'active' ? 'Ativo' : 'Pendente'}
+                                                </ThemedText>
+                                            </View>
+                                        </View>
+
+                                        <View style={styles.affiliateStats}>
+                                            <View style={styles.affiliateStatItem}>
+                                                <ThemedText style={styles.affiliateStatText}>📅 {new Date(affiliate.joinDate).toLocaleDateString('pt-BR')}</ThemedText>
+                                            </View>
+
+                                            {affiliate.status === 'active' && (
+                                                <>
+                                                    <View style={styles.affiliateStatItem}>
+                                                        <ThemedText style={styles.affiliateStatText}>💰 R$ {affiliate.totalEarnings.toFixed(2)}</ThemedText>
+                                                    </View>
+                                                    <View style={styles.affiliateStatItem}>
+                                                        <ThemedText style={styles.affiliateStatText}>⚡ {affiliate.energyConsumption} kWh</ThemedText>
+                                                    </View>
+                                                </>
+                                            )}
+                                        </View>
+
+                                        <ThemedText style={styles.chevronText}>›</ThemedText>
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                        </View>
+                    </View>
                 </View>
-                <ThemedText style={styles.statValue}>R$ {userStats.totalEarnings.toFixed(2)}</ThemedText>
-                <ThemedText style={styles.statLabel}>Total Ganho</ThemedText>
-                <View style={styles.statTrend}>
-                  <IconSymbol name="arrow.up.right" size={12} color="white" />
-                  <ThemedText style={styles.statTrendText}>+12%</ThemedText>
+            </Modal>
+
+            {/* Modal de Detalhes do Afiliado */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={affiliateModalVisible}
+                onRequestClose={() => setAffiliateModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.affiliateDetailModal}>
+                        <View style={styles.affiliateDetailHeader}>
+                            <View style={styles.affiliateDetailIconContainer}>
+                                <View style={[
+                                    styles.affiliateDetailIcon,
+                                    { backgroundColor: selectedAffiliate?.status === 'active' ? '#4CAF50' : '#FF9800' }
+                                ]}>
+                                    <ThemedText style={styles.affiliateDetailIconText}>
+                                        {selectedAffiliate?.name?.charAt(0)}
+                                    </ThemedText>
+                                </View>
+                            </View>
+                            <View style={styles.affiliateDetailTitleContainer}>
+                                <ThemedText style={styles.affiliateDetailTitle}>
+                                    {selectedAffiliate?.name}
+                                </ThemedText>
+                                <ThemedText style={styles.affiliateDetailSubtitle}>
+                                    {selectedAffiliate?.email}
+                                </ThemedText>
+                            </View>
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setAffiliateModalVisible(false)}
+                            >
+                                <ThemedText style={styles.closeButtonText}>✕</ThemedText>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.affiliateDetailContent}>
+                            <ThemedText style={styles.affiliateDetailDescription}>
+                                Afiliado do Clubão do Descontão
+                            </ThemedText>
+
+                            <View style={styles.affiliateDetailPricingBox}>
+                                <View style={styles.affiliateDetailPricingRow}>
+                                    <ThemedText style={styles.affiliateDetailPricingLabel}>Status:</ThemedText>
+                                    <View style={[
+                                        styles.affiliateDetailStatusBadge,
+                                        { backgroundColor: selectedAffiliate?.status === 'active' ? '#4CAF50' : '#FF9800' }
+                                    ]}>
+                                        <ThemedText style={styles.affiliateDetailStatusText}>
+                                            {selectedAffiliate?.status === 'active' ? 'Ativo' : 'Pendente'}
+                                        </ThemedText>
+                                    </View>
+                                </View>
+
+                                <View style={styles.affiliateDetailPricingRow}>
+                                    <ThemedText style={styles.affiliateDetailPricingLabel}>Data de cadastro:</ThemedText>
+                                    <ThemedText style={styles.affiliateDetailPricingValue}>
+                                        {selectedAffiliate ? new Date(selectedAffiliate.joinDate).toLocaleDateString('pt-BR') : ''}
+                                    </ThemedText>
+                                </View>
+
+                                <View style={styles.affiliateDetailPricingRow}>
+                                    <ThemedText style={styles.affiliateDetailPricingLabel}>Ganhos totais:</ThemedText>
+                                    <ThemedText style={styles.affiliateDetailPricingValue}>
+                                        R$ {selectedAffiliate?.totalEarnings.toFixed(2)}
+                                    </ThemedText>
+                                </View>
+
+                                <View style={styles.affiliateDetailPricingRow}>
+                                    <ThemedText style={styles.affiliateDetailPricingLabel}>Ganhos mensais:</ThemedText>
+                                    <ThemedText style={styles.affiliateDetailPricingValue}>
+                                        R$ {selectedAffiliate?.monthlyEarnings.toFixed(2)}
+                                    </ThemedText>
+                                </View>
+
+                                {selectedAffiliate?.status === 'active' && (
+                                    <View style={styles.affiliateDetailPricingRow}>
+                                        <ThemedText style={styles.affiliateDetailPricingLabel}>Consumo de energia:</ThemedText>
+                                        <ThemedText style={styles.affiliateDetailPricingValue}>
+                                            {selectedAffiliate?.energyConsumption} kWh
+                                        </ThemedText>
+                                    </View>
+                                )}
+                            </View>
+
+                            <View style={styles.affiliateDetailStockContainer}>
+                                <View style={styles.affiliateDetailStockIcon}>
+                                    <ThemedText style={styles.affiliateDetailStockIconText}>✓</ThemedText>
+                                </View>
+                                <ThemedText style={styles.affiliateDetailStockText}>
+                                    {selectedAffiliate?.status === 'active' ? 'Ativo no sistema' : 'Aguardando ativação'}
+                                </ThemedText>
+                            </View>
+                        </View>
+
+                        <TouchableOpacity
+                            style={styles.affiliateDetailButton}
+                            onPress={() => setAffiliateModalVisible(false)}
+                        >
+                            <ThemedText style={styles.affiliateDetailButtonText}>Fechar</ThemedText>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={[styles.statCard, { backgroundColor: '#2196F3' }]} activeOpacity={0.8}>
-                <View style={styles.statIconContainer}>
-                  <IconSymbol name="bolt.fill" size={28} color="white" />
-                </View>
-                <ThemedText style={styles.statValue}>{userStats.totalKwh.toFixed(1)} kWh</ThemedText>
-                <ThemedText style={styles.statLabel}>Energia Economizada</ThemedText>
-                <View style={styles.statTrend}>
-                  <IconSymbol name="arrow.up.right" size={12} color="white" />
-                  <ThemedText style={styles.statTrendText}>+8%</ThemedText>
-                </View>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.statsRow}>
-              <TouchableOpacity style={[styles.statCard, { backgroundColor: '#FF9800' }]} activeOpacity={0.8}>
-                <View style={styles.statIconContainer}>
-                  <IconSymbol name="person.2.fill" size={28} color="white" />
-                </View>
-                <ThemedText style={styles.statValue}>{userStats.referralsCount}</ThemedText>
-                <ThemedText style={styles.statLabel}>Indicações</ThemedText>
-                <View style={styles.statTrend}>
-                  <IconSymbol name="arrow.up.right" size={12} color="white" />
-                  <ThemedText style={styles.statTrendText}>+3</ThemedText>
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={[styles.statCard, { backgroundColor: '#9C27B0' }]} activeOpacity={0.8}>
-                <View style={styles.statIconContainer}>
-                  <IconSymbol name="arrow.clockwise.circle.fill" size={28} color="white" />
-                </View>
-                <ThemedText style={styles.statValue}>R$ {userStats.monthlyRecurring.toFixed(2)}</ThemedText>
-                <ThemedText style={styles.statLabel}>Recorrente/Mês</ThemedText>
-                <View style={styles.statTrend}>
-                  <IconSymbol name="arrow.up.right" size={12} color="white" />
-                  <ThemedText style={styles.statTrendText}>+5%</ThemedText>
-                </View>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Quick Actions */}
-          <View style={styles.quickActionsContainer}>
-            <ThemedText type="subtitle" style={styles.sectionTitle}>
-              Ações Rápidas
-            </ThemedText>
-
-            <View style={styles.quickActionsRow}>
-              <TouchableOpacity style={styles.quickActionButton} onPress={handleEnergyDiscount}>
-                <View style={[styles.quickActionIcon, { backgroundColor: '#FF6B35' }]}>
-                  <IconSymbol name="bolt.fill" size={24} color="white" />
-                </View>
-                <ThemedText style={styles.quickActionText}>Cadastrar Energia</ThemedText>
-                <ThemedText style={styles.quickActionSubtext}>Economize 20%</ThemedText>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.quickActionButton} onPress={handleReferral}>
-                <View style={[styles.quickActionIcon, { backgroundColor: '#4CAF50' }]}>
-                  <IconSymbol name="person.badge.plus" size={24} color="white" />
-                </View>
-                <ThemedText style={styles.quickActionText}>Indicar Amigo</ThemedText>
-                <ThemedText style={styles.quickActionSubtext}>Ganhe 30%</ThemedText>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Main Services */}
-          <View style={styles.servicesContainer}>
-            <ThemedText type="subtitle" style={styles.sectionTitle}>
-              Nossos Serviços
-            </ThemedText>
-
-            <TouchableOpacity style={styles.serviceCard} onPress={handleEnergyDiscount}>
-              <View style={styles.serviceIcon}>
-                <IconSymbol name="bolt.fill" size={32} color="#FF6B35" />
-              </View>
-              <View style={styles.serviceContent}>
-                <ThemedText style={styles.serviceTitle}>Desconto de Energia</ThemedText>
-                <ThemedText style={styles.serviceDescription}>
-                  Economize 20% na sua conta de energia
-                </ThemedText>
-                <View style={styles.discountBadge}>
-                  <ThemedText style={styles.discountText}>-20%</ThemedText>
-                </View>
-              </View>
-              <IconSymbol name="chevron.right" size={20} color="#999" />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.serviceCard} onPress={handleMedicines}>
-              <View style={styles.serviceIcon}>
-                <IconSymbol name="pills.fill" size={32} color="#4CAF50" />
-              </View>
-              <View style={styles.serviceContent}>
-                <ThemedText style={styles.serviceTitle}>Medicamentos</ThemedText>
-                <ThemedText style={styles.serviceDescription}>
-                  Compre direto dos laboratórios
-                </ThemedText>
-                <View style={styles.newBadge}>
-                  <ThemedText style={styles.newText}>Em Breve</ThemedText>
-                </View>
-              </View>
-              <IconSymbol name="chevron.right" size={20} color="#999" />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.serviceCard} onPress={handleSalonBooking}>
-              <View style={styles.serviceIcon}>
-                <IconSymbol name="scissors" size={32} color="#E91E63" />
-              </View>
-              <View style={styles.serviceContent}>
-                <ThemedText style={styles.serviceTitle}>Salões de Beleza</ThemedText>
-                <ThemedText style={styles.serviceDescription}>
-                  Agende seus serviços de beleza
-                </ThemedText>
-                <View style={styles.newBadge}>
-                  <ThemedText style={styles.newText}>Em Breve</ThemedText>
-                </View>
-              </View>
-              <IconSymbol name="chevron.right" size={20} color="#999" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Referral System */}
-          <View style={styles.referralContainer}>
-            <ThemedText type="subtitle" style={styles.sectionTitle}>
-              Sistema de Indicação
-            </ThemedText>
-
-            <View style={styles.referralCard}>
-              <View style={styles.referralHeader}>
-                <IconSymbol name="gift.fill" size={24} color="#FF6B35" />
-                <ThemedText style={styles.referralTitle}>Ganhe Indicando!</ThemedText>
-              </View>
-              <ThemedText style={styles.referralDescription}>
-                • 30% do valor em kWh por indicação{'\n'}
-                • 1% recorrente das contas cadastradas{'\n'}
-                • Acompanhe sua rede de indicações
-              </ThemedText>
-              <TouchableOpacity style={styles.referralButton} onPress={handleReferral}>
-                <ThemedText style={styles.referralButtonText}>Ver Minhas Indicações</ThemedText>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Footer */}
-          <View style={styles.footer}>
-            <ThemedText style={styles.footerText}>
-              Os melhores descontos estão aqui! 🎉
-            </ThemedText>
-          </View>
-        </Animated.View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+            </Modal>
+        </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    paddingBottom: 20,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 20,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  greetingContainer: {
-    flex: 1,
-  },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FF6B35',
-  },
-  subtitleText: {
-    fontSize: 16,
-    opacity: 0.7,
-    marginTop: 4,
-  },
-  logoutButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 107, 53, 0.1)',
-  },
-  statsContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-    marginTop: 10,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 12,
-  },
-  statCard: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
+    container: {
+        flex: 1,
     },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  statIconContainer: {
-    marginBottom: 8,
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: 'white',
-    opacity: 0.9,
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  statTrend: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statTrendText: {
-    fontSize: 10,
-    color: 'white',
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  quickActionsContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-    marginTop: 10,
-  },
-  quickActionsRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  quickActionButton: {
-    flex: 1,
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    scrollView: {
+        flex: 1,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  quickActionIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  quickActionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  quickActionSubtext: {
-    fontSize: 12,
-    opacity: 0.7,
-    textAlign: 'center',
-  },
-  servicesContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-    marginTop: 10,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    color: '#FF6B35',
-  },
-  serviceCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    content: {
+        flex: 1,
+        paddingBottom: 20,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  serviceIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255, 107, 53, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
-  },
-  serviceContent: {
-    flex: 1,
-  },
-  serviceTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  serviceDescription: {
-    fontSize: 14,
-    opacity: 0.7,
-    marginBottom: 8,
-  },
-  discountBadge: {
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-  },
-  discountText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  newBadge: {
-    backgroundColor: '#FF9800',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-  },
-  newText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  referralContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-    marginTop: 10,
-  },
-  referralCard: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    header: {
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 20,
+        backgroundColor: '#FF6B35',
+        alignItems: 'center',
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  referralHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  referralTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 8,
-    color: '#FF6B35',
-  },
-  referralDescription: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 16,
-    opacity: 0.8,
-  },
-  referralButton: {
-    backgroundColor: '#FF6B35',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  referralButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
-  footer: {
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 30,
-    paddingTop: 20,
-  },
-  footerText: {
-    fontSize: 14,
-    opacity: 0.7,
-    textAlign: 'center',
-  },
+    title: {
+        fontSize: 24,
+        fontWeight: '900',
+        fontFamily: 'Arial Black',
+        color: 'white',
+        marginBottom: 8,
+    },
+    subtitle: {
+        fontSize: 16,
+        fontFamily: 'Arial Black',
+        color: 'white',
+        opacity: 0.9,
+        textAlign: 'center',
+    },
+    statsContainer: {
+        paddingHorizontal: 20,
+        paddingTop: 30,
+        marginBottom: 30,
+    },
+    statsRow: {
+        flexDirection: 'row',
+        gap: 12,
+        marginBottom: 12,
+    },
+    statCard: {
+        flex: 1,
+        padding: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    statValue: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: 'white',
+        marginTop: 8,
+        marginBottom: 4,
+    },
+    statLabel: {
+        fontSize: 12,
+        color: 'white',
+        opacity: 0.9,
+        textAlign: 'center',
+    },
+    quickActionsContainer: {
+        paddingHorizontal: 20,
+        marginBottom: 30,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 16,
+        color: '#FF6B35',
+    },
+    quickActionsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 12,
+    },
+    quickActionCard: {
+        width: '48%',
+        backgroundColor: 'white',
+        padding: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    quickActionIcon: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 12,
+    },
+    quickActionTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 4,
+        textAlign: 'center',
+    },
+    quickActionDescription: {
+        fontSize: 12,
+        opacity: 0.7,
+        textAlign: 'center',
+    },
+    logoImage: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+    },
+    shareContainer: {
+        paddingHorizontal: 20,
+        marginBottom: 30,
+    },
+    shareCard: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    shareHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    shareTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginLeft: 8,
+        color: '#FF6B35',
+    },
+    shareDescription: {
+        fontSize: 14,
+        lineHeight: 20,
+        marginBottom: 16,
+        opacity: 0.8,
+    },
+    shareButton: {
+        backgroundColor: '#FF6B35',
+        padding: 16,
+        borderRadius: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+    },
+    shareButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    footer: {
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingBottom: 30,
+    },
+    footerText: {
+        fontSize: 14,
+        opacity: 0.7,
+        textAlign: 'center',
+    },
+    // Modal styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContainer: {
+        backgroundColor: 'white',
+        borderRadius: 16,
+        margin: 20,
+        maxWidth: 400,
+        width: '90%',
+        maxHeight: '80%',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+        elevation: 8,
+    },
+    modalContent: {
+        flex: 1,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E5E5E7',
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#FF6B35',
+    },
+    closeButton: {
+        padding: 4,
+    },
+    closeButtonText: {
+        fontSize: 18,
+        color: '#666',
+        fontWeight: 'bold',
+    },
+    affiliatesList: {
+        flex: 1,
+        padding: 20,
+    },
+    affiliateCard: {
+        backgroundColor: 'white',
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 12,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    affiliateHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 12,
+        flex: 1,
+    },
+    affiliateInfo: {
+        flex: 1,
+    },
+    affiliateName: {
+        fontSize: 16,
+        fontWeight: '600',
+        marginBottom: 4,
+    },
+    affiliateEmail: {
+        fontSize: 14,
+        opacity: 0.7,
+    },
+    statusBadge: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+    statusText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    affiliateStats: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 16,
+        flex: 1,
+    },
+    affiliateStatItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    affiliateStatText: {
+        fontSize: 12,
+        opacity: 0.7,
+    },
+    chevronText: {
+        fontSize: 20,
+        color: '#999',
+        fontWeight: 'bold',
+    },
+    // Modal de detalhes do afiliado
+    affiliateDetailModal: {
+        backgroundColor: 'white',
+        borderRadius: 16,
+        margin: 20,
+        maxWidth: 400,
+        width: '90%',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+        elevation: 8,
+    },
+    affiliateDetailHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 20,
+        paddingBottom: 16,
+    },
+    affiliateDetailIconContainer: {
+        marginRight: 12,
+    },
+    affiliateDetailIcon: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    affiliateDetailIconText: {
+        color: 'white',
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+    affiliateDetailTitleContainer: {
+        flex: 1,
+    },
+    affiliateDetailTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 4,
+    },
+    affiliateDetailSubtitle: {
+        fontSize: 14,
+        color: '#FF6B35',
+        fontWeight: '500',
+    },
+    affiliateDetailContent: {
+        paddingHorizontal: 20,
+        paddingBottom: 20,
+    },
+    affiliateDetailDescription: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 16,
+    },
+    affiliateDetailPricingBox: {
+        backgroundColor: '#F8F9FA',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: '#E9ECEF',
+    },
+    affiliateDetailPricingRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    affiliateDetailPricingLabel: {
+        fontSize: 14,
+        color: '#666',
+        flex: 1,
+    },
+    affiliateDetailPricingValue: {
+        fontSize: 14,
+        color: '#333',
+        fontWeight: '500',
+        textAlign: 'right',
+    },
+    affiliateDetailStatusBadge: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+    affiliateDetailStatusText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    affiliateDetailStockContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    affiliateDetailStockIcon: {
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        backgroundColor: '#4CAF50',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 8,
+    },
+    affiliateDetailStockIconText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    affiliateDetailStockText: {
+        fontSize: 14,
+        color: '#4CAF50',
+        fontWeight: '500',
+    },
+    affiliateDetailButton: {
+        backgroundColor: '#FF6B35',
+        padding: 16,
+        margin: 20,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    affiliateDetailButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
 });
