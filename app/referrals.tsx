@@ -155,7 +155,8 @@ export default function ReferralsScreen() {
                         style={styles.backButton}
                         onPress={() => router.back()}
                     >
-                        <IconSymbol name="chevron.left" size={24} color="#FF6B35" />
+                        <IconSymbol name="chevron.left" size={28} color="#FF6B35" />
+                        <ThemedText style={styles.backButtonText}>Voltar</ThemedText>
                     </TouchableOpacity>
                     <View style={styles.headerContent}>
                         <ThemedText type="title" style={styles.title}>
@@ -500,8 +501,25 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
     },
     backButton: {
-        padding: 8,
-        marginRight: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
+        backgroundColor: 'rgba(255, 107, 53, 0.15)',
+        borderRadius: 25,
+        marginRight: 15,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 107, 53, 0.3)',
+        shadowColor: '#FF6B35',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    backButtonText: {
+        marginLeft: 6,
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#FF6B35',
     },
     headerContent: {
         flex: 1,

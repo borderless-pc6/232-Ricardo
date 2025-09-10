@@ -457,14 +457,21 @@ export default function BeautySalonsScreen() {
                             style={styles.backButton}
                             onPress={() => router.back()}
                         >
-                            <IconSymbol name="chevron.left" size={24} color="#FF6B35" />
+                            <IconSymbol name="chevron.left" size={28} color="#FF6B35" />
+                            <ThemedText style={styles.backButtonText}>Voltar</ThemedText>
                         </TouchableOpacity>
                         <ThemedText type="title" style={styles.headerTitle}>
                             Salões de Beleza
                         </ThemedText>
-                        <TouchableOpacity style={styles.calendarButton} onPress={handleCalendarButtonPress}>
-                            <IconSymbol name="calendar" size={24} color="#FF6B35" />
-                        </TouchableOpacity>
+                        <View style={styles.headerActions}>
+                            <TouchableOpacity style={styles.calendarButton} onPress={handleCalendarButtonPress}>
+                                <IconSymbol name="calendar" size={24} color="#FF6B35" />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.logoutButton} onPress={() => router.replace('/auth')}>
+                                <IconSymbol name="power" size={24} color="#FF6B35" />
+                                <ThemedText style={styles.logoutButtonText}>Sair</ThemedText>
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
                     <ThemedText style={styles.headerSubtitle}>
@@ -491,7 +498,7 @@ export default function BeautySalonsScreen() {
                     <FlatList
                         data={categories}
                         renderItem={renderCategory}
-                        keyExtractor={(item) => item.id}
+                        keyExtractor={(item: { id: any; }) => item.id}
                         horizontal
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={styles.categoriesList}
@@ -504,7 +511,7 @@ export default function BeautySalonsScreen() {
                     <FlatList
                         data={salons}
                         renderItem={renderSalon}
-                        keyExtractor={(item) => item.id}
+                        keyExtractor={(item: { id: any; }) => item.id}
                         horizontal
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={styles.salonsList}
@@ -567,7 +574,7 @@ export default function BeautySalonsScreen() {
                                     <View style={styles.durationSection}>
                                         <View style={styles.durationInfo}>
                                             <IconSymbol name="clock.fill" size={20} color="#FF6B35" />
-                                            <ThemedText style={styles.durationText}>
+                                            <ThemedText style={styles.modalDurationText}>
                                                 Duração: {selectedService.duration} minutos
                                             </ThemedText>
                                         </View>
@@ -928,34 +935,74 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: 20,
-        paddingTop: 16,
-        paddingBottom: 12,
+        paddingTop: 50,
+        paddingBottom: 4,
     },
     headerTop: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 4,
+        marginBottom: 2,
     },
     backButton: {
-        padding: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
+        backgroundColor: 'rgba(255, 107, 53, 0.15)',
+        borderRadius: 25,
+        marginRight: 15,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 107, 53, 0.3)',
+        shadowColor: '#FF6B35',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    backButtonText: {
+        marginLeft: 6,
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#FF6B35',
     },
     headerTitle: {
-        fontSize: 24,
+        fontSize: 20,
         fontWeight: 'bold',
         color: '#FF6B35',
+        marginBottom: 0,
+    },
+    headerActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
     },
     calendarButton: {
         padding: 8,
     },
+    logoutButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 8,
+        backgroundColor: 'rgba(255, 107, 53, 0.1)',
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 107, 53, 0.3)',
+    },
+    logoutButtonText: {
+        marginLeft: 4,
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#FF6B35',
+    },
     headerSubtitle: {
-        fontSize: 16,
+        fontSize: 14,
         opacity: 0.7,
         textAlign: 'center',
+        marginTop: 4,
     },
     searchContainer: {
         paddingHorizontal: 20,
-        marginBottom: 16,
+        marginBottom: 12,
     },
     searchBar: {
         flexDirection: 'row',
@@ -977,7 +1024,7 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     categoriesContainer: {
-        marginBottom: 16,
+        marginBottom: 12,
     },
     categoriesList: {
         paddingHorizontal: 20,
@@ -1006,13 +1053,13 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     salonsSection: {
-        marginBottom: 20,
+        marginBottom: 16,
     },
     sectionTitle: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
         color: '#FF6B35',
-        marginBottom: 12,
+        marginBottom: 8,
         paddingHorizontal: 20,
     },
     salonsList: {
@@ -1289,7 +1336,7 @@ const styles = StyleSheet.create({
         padding: 12,
         borderRadius: 8,
     },
-    durationText: {
+    modalDurationText: {
         marginLeft: 8,
         fontSize: 16,
         fontWeight: '600',

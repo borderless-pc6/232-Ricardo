@@ -1,6 +1,7 @@
 import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
     Alert,
@@ -87,7 +88,7 @@ export default function ProfileScreen() {
             description: 'Preferências e notificações',
             icon: 'gear',
             color: '#666',
-            action: () => setSettingsModalVisible(true),
+            action: () => router.push('/settings'),
         },
         {
             id: 3,
@@ -167,6 +168,20 @@ export default function ProfileScreen() {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor }]}>
+            {/* Header com botão de voltar */}
+            <View style={styles.header}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => router.back()}
+                >
+                    <IconSymbol name="chevron.left" size={24} color="#FF6B35" />
+                </TouchableOpacity>
+                <ThemedText type="title" style={styles.headerTitle}>
+                    Perfil
+                </ThemedText>
+                <View style={styles.headerSpacer} />
+            </View>
+
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 {/* Header */}
                 <View style={styles.header}>
@@ -464,6 +479,28 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingTop: 10,
+        paddingBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+        backgroundColor: 'white',
+    },
+    backButton: {
+        padding: 8,
+    },
+    headerTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#FF6B35',
+    },
+    headerSpacer: {
+        width: 40, // Mesmo tamanho do botão para centralizar o título
     },
     scrollView: {
         flex: 1,

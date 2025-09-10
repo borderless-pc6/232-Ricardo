@@ -1,14 +1,14 @@
+import { ThemedText } from '@/components/ThemedText';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { useThemeColor } from '@/hooks/useThemeColor';
+import { router } from 'expo-router';
 import React from 'react';
 import {
-  View,
   StyleSheet,
   TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import { ThemedText } from '@/components/ThemedText';
-import { useThemeColor } from '@/hooks/useThemeColor';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function RegistrationSuccessScreen() {
   const backgroundColor = useThemeColor({}, 'background');
@@ -16,6 +16,20 @@ export default function RegistrationSuccessScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
+      {/* Header com botão de voltar */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <IconSymbol name="chevron.left" size={24} color="#FF6B35" />
+        </TouchableOpacity>
+        <ThemedText type="title" style={styles.headerTitle}>
+          Sucesso
+        </ThemedText>
+        <View style={styles.headerSpacer} />
+      </View>
+
       <View style={styles.content}>
         {/* Success Icon */}
         <View style={styles.iconContainer}>
@@ -141,6 +155,27 @@ export default function RegistrationSuccessScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FF6B35',
+  },
+  headerSpacer: {
+    width: 40, // Mesmo tamanho do botão para centralizar o título
   },
   content: {
     flex: 1,

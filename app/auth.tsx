@@ -1,25 +1,25 @@
+import { ThemedText } from '@/components/ThemedText';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { useThemeColor } from '@/hooks/useThemeColor';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default function AuthScreen() {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('123@gmail.com');
+  const [password, setPassword] = useState('123456');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
 
@@ -28,6 +28,8 @@ export default function AuthScreen() {
   const tintColor = useThemeColor({}, 'tint');
 
   const handleAuth = () => {
+    console.log('Tentando fazer login...', { email, password });
+
     if (!email || !password) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios');
       return;
@@ -43,24 +45,32 @@ export default function AuthScreen() {
       return;
     }
 
-    // Aqui você implementaria a lógica de autenticação
-    Alert.alert(
-      'Sucesso!',
-      isLogin ? 'Login realizado com sucesso!' : 'Conta criada com sucesso!',
-      [
-        {
-          text: 'OK',
-          onPress: () => {
-            // Navega para a tela principal após autenticação bem-sucedida
-            router.replace('/(tabs)');
-          },
-        },
-      ]
-    );
+    // Login direto sem alert
+    console.log('Login válido, navegando...');
+    try {
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Erro na navegação:', error);
+      Alert.alert('Erro', 'Erro ao fazer login. Tente novamente.');
+    }
   };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
+      {/* Header com botão de voltar */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <IconSymbol name="chevron.left" size={24} color="#FF6B35" />
+        </TouchableOpacity>
+        <ThemedText type="title" style={styles.headerTitle}>
+          {isLogin ? 'Entrar' : 'Cadastrar'}
+        </ThemedText>
+        <View style={styles.headerSpacer} />
+      </View>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
@@ -138,6 +148,19 @@ export default function AuthScreen() {
               </Text>
             </TouchableOpacity>
 
+            {/* Botão de teste para pular login */}
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: '#4CAF50', marginTop: 10 }]}
+              onPress={() => {
+                console.log('Pulando login...');
+                router.replace('/(tabs)');
+              }}
+            >
+              <Text style={styles.buttonText}>
+                Pular Login (Teste)
+              </Text>
+            </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.switchButton}
               onPress={() => setIsLogin(!isLogin)}
@@ -164,6 +187,28 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    backgroundColor: 'white',
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FF6B35',
+  },
+  headerSpacer: {
+    width: 40, // Mesmo tamanho do botão para centralizar o título
   },
   keyboardView: {
     flex: 1,

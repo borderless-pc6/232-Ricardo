@@ -297,18 +297,26 @@ export default function MedicinesScreen() {
                     <TouchableOpacity
                         style={styles.backButton}
                         onPress={() => router.back()}
-                    >
-                        <IconSymbol name="chevron.left" size={24} color="#FF6B35" />
+                    > Voltar
+                        <IconSymbol name="chevron.left" size={28} color="#FF6B35" />
                     </TouchableOpacity>
-                    <ThemedText type="title" style={styles.headerTitle}>
-                        Medicamentos
-                    </ThemedText>
-                    <TouchableOpacity style={styles.cartButton} onPress={() => router.push('/cart')}>
-                        <IconSymbol name="cart.fill" size={24} color="#FF6B35" />
-                        <View style={styles.cartBadge}>
-                            <ThemedText style={styles.cartBadgeText}>2</ThemedText>
-                        </View>
-                    </TouchableOpacity>
+                    <View style={styles.titleContainer}>
+                        <ThemedText type="title" style={styles.headerTitle}>
+                            Medicamentos
+                        </ThemedText>
+                    </View>
+                    <View style={styles.headerActions}>
+                        <TouchableOpacity style={styles.cartButton} onPress={() => router.push('/cart')}>
+                            <IconSymbol name="cart.fill" size={24} color="#FF6B35" />
+                            <View style={styles.cartBadge}>
+                                <ThemedText style={styles.cartBadgeText}>2</ThemedText>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.logoutButton} onPress={() => router.replace('/auth')}>
+                            <IconSymbol name="power" size={24} color="#FF6B35" />
+                            <ThemedText style={styles.logoutButtonText}>Sair</ThemedText>
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 <ThemedText style={styles.headerSubtitle}>
@@ -554,7 +562,7 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: 20,
-        paddingTop: 16,
+        paddingTop: 50,
         paddingBottom: 12,
     },
     headerTop: {
@@ -564,16 +572,50 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     backButton: {
-        padding: 8,
+        padding: 12,
+        backgroundColor: 'rgba(255, 107, 53, 0.15)',
+        borderRadius: 25,
+        marginRight: 15,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 107, 53, 0.3)',
+        shadowColor: '#FF6B35',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    titleContainer: {
+        flex: 1,
+        alignItems: 'center',
     },
     headerTitle: {
         fontSize: 24,
         fontWeight: 'bold',
         color: '#FF6B35',
     },
+    headerActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
     cartButton: {
         position: 'relative',
         padding: 8,
+    },
+    logoutButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 8,
+        backgroundColor: 'rgba(255, 107, 53, 0.1)',
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 107, 53, 0.3)',
+    },
+    logoutButtonText: {
+        marginLeft: 4,
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#FF6B35',
     },
     cartBadge: {
         position: 'absolute',
